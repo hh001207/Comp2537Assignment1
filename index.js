@@ -48,7 +48,9 @@ app.use(session({
 ));
 
 app.get('/', (req,res) => {
-    res.send("<h1>Hello World!</h1>");
+    if(!req.session.authenticated) {
+        res.send('<a href ="/createUser"> <button>Sign up</button> </a> <br> <a href ="/login"><button>Log in</button> </a>')
+    }
 });
 
 app.get('/nosql-injection', async (req,res) => {
@@ -81,11 +83,6 @@ app.get('/nosql-injection', async (req,res) => {
     res.send(`<h1>Hello ${username}</h1>`);
 });
 
-app.get('/about', (req,res) => {
-    var color = req.query.color;
-
-    res.send("<h1 style='color:"+color+";'>Patrick Guichon</h1>");
-});
 
 app.get('/contact', (req,res) => {
     var missingEmail = req.query.missing;
@@ -117,7 +114,8 @@ app.get('/createUser', (req,res) => {
     var html = `
     create user
     <form action='/submitUser' method='post'>
-    <input name='username' type='text' placeholder='username'>
+    <input name='username' type='text' placeholder='name'>
+    <input name='email' type='text' placeholder='email'>
     <input name='password' type='password' placeholder='password'>
     <button>Submit</button>
     </form>
