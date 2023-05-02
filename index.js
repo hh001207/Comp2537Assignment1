@@ -14,7 +14,7 @@ const app = express();
 const Joi = require("joi");
 
 
-const expireTime = 24 * 60 * 60 * 1000; //expires after 1 day  (hours * minutes * seconds * millis)
+const expireTime = 1 * 60 * 60 * 1000; //expires after 1 day  (hours * minutes * seconds * millis)
 
 /* secret information section */
 const mongodb_host = process.env.MONGODB_HOST;
@@ -47,10 +47,21 @@ app.use(session({
 }
 ));
 
-app.get('/', (req,res) => {
-    if(!req.session.authenticated) {
-        res.send('<a href ="/createUser"> <button>Sign up</button> </a> <br> <a href ="/login"><button>Log in</button> </a>')
-    }
+app.get('/', (req, res) => {
+	if (!req.session.authenticated) {
+		res.send(`
+			<button><a href='/signup'">Sign up</a></button>
+			<br><br>
+			<button><a href='/login'">Log in</a></button>
+			`);
+	} else {
+		res.send(`
+			<p>Hello, ${req.session.username}!</p>
+			<button><a href='/user'">Go to Members Area</a></button>
+			<br>
+            <button><a href='/logout'">Logout</a></button>
+			`);
+	}
 });
 
 app.get('/nosql-injection', async (req,res) => {
@@ -200,20 +211,31 @@ app.post('/loggingin', async (req,res) => {
 
 app.get('/loggedin', (req,res) => {
     if (!req.session.authenticated) {
-        res.redirect('/login');
+        res.redirect('/');
+    }else {
+        res.redirect('/member');
     }
-    var html = `
-    You are logged in!
-    `;
-    res.send(html);
 });
 
 app.get('/logout', (req,res) => {
 	req.session.destroy();
-    var html = `
-    You are logged out.
-    `;
-    res.send(html);
+    res.redirect('/');
+});
+
+app.get('/member', (req,res) => {
+    if (!req.session.authenticated) {
+        res.redirect('/');
+        }else {
+            const images = ['/ben.jpg', '/m4.jpg' , 'gwa.jpg'];
+            const randim = Math.floor(Math.random() * images.length);
+
+            res.send(`<h1>Hello, ${req.session.username}.</h1>
+        <img src='${images[randim]}' width= "250px">
+        <form action='/logout' method='get'> 
+        <br>
+        <button type ='submit'>Log out</button>
+        </form>`);
+        }
 });
 
 
